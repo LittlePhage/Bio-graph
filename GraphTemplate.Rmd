@@ -1,0 +1,81 @@
+Bar Graph Template
+
+
+Dataset
+```{r}
+#loading in data into a dataframe
+df <- ChickWeight
+colnames(df)
+head(df)
+
+#further documentation of the dataset: (https://www.rdocumentation.org/packages/datasets/versions/3.6.2/topics/ChickWeight)
+#(time is in units of days, weight is in units of grams)
+
+#Graph overview:
+#x axis: chicks 1, 2, 21, 22
+#y axis: weight
+#1st sep: time from 0 to 2
+#2nd sep: diet 1 (chicks 1,2) vs diet 2 (chicks 21,22)
+
+
+#only selecting [chicks 1, 2, 21,and 22] and [times 0 to 2].
+df$weight <- as.numeric(df$weight)
+df$Time <- as.numeric(df$Time)
+
+chicks <- c(1,2,21,22)
+df1 <- df[df$Chick %in% chicks,]
+
+selecteddf <- subset(df1, Time < 3)
+
+
+#we can also manually entered the data:
+df <- data.frame(xlabels = c(
+  '1',' 1','2',' 2','21',' 21','22',' 22'),
+  ylabels = c(
+  42,51,40,49,40,50,41,55),
+  #standard error if needed (made up numbers)
+  SE = c(
+  1,2,3,4,1,2,3,4),
+  #first sep
+  groups1 = c(0,2,0,2,0,2,0,2
+    ),
+  #second sep
+  groups2 = c('diet 1','diet 1','diet 1','diet 1','diet 2','diet 2','diet 2','diet 2'))
+
+#Manually order the x axis labels.
+df$xlabels <- factor(df$xlabels,        
+                 levels = c('1',
+                             ' 1',
+                             '2',
+                             ' 2',
+                             '21',
+                             ' 21',
+                              '22',
+                            ' 22'))
+
+df
+```
+
+
+Graphing the data
+
+```{r}
+library(ggplot2)
+p <- ggplot(data = df, aes(x = xlabels, y = ylabels, fill = groups2)) + 
+  theme_classic() +
+  #errorbars if needed
+  geom_errorbar(aes(ymin = ylabels,ymax = ylabels + SE), width = 0.1)+
+  geom_bar(stat = 'identity', width = 0.8) +
+  #Add in the x and y axis titles.
+  labs(x = '\nChick #', y = 'Weight (gm)', fill = '') +
+  #Add in graph title.
+  ggtitle('Chick weight with different diets') +
+  scale_y_continuous(expand = c(0, 0)) +
+  #Set the colors of the bars. see more at: http://www.stat.columbia.edu/~tzheng/files/Rcolor.pdf
+  scale_fill_manual(values = c('darkolivegreen3', 'gray22')) +
+  facet_wrap(~groups1, strip.position = "bottom", scales = "free_x") +
+    theme(axis.text.x = element_text(angle = 70, vjust = 1, hjust=1))
+p
+
+```
+
